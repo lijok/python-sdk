@@ -5,6 +5,7 @@ import os
 import pathlib
 import shutil
 import subprocess
+import sys
 import typing
 
 
@@ -42,7 +43,7 @@ def call(
     sudo_binary: str = "sudo",
     environment_variables: dict[str, str] | None = None,
     stream_output: bool = False,
-    stream_printer: typing.Callable[[str], None] = functools.partial(print, end="", flush=True),
+    stream_printer: typing.Callable[[str], None] = functools.partial(print, end="", file=sys.stderr),
     force_arch: typing.Literal["amd64", "x86_64"] | None = None,
     stdin: typing.TextIO | None = None,
     cwd: pathlib.Path | None = None,
