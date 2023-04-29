@@ -12,7 +12,8 @@ def app() -> None:
     if not _CLI_DEPENDENCIES_INSTALLED:
         print(
             "CLI dependencies are not installed. "
-            "Please run `pip install pythonsdk[cli]` to unlock this functionality."
+            "Please run `pip install pythonsdk[cli]` to unlock this functionality.",
+            file=sys.stderr,
         )
         sys.exit(1)
 
@@ -23,7 +24,7 @@ def app() -> None:
     elif args.command == "version":
         _version.version()
     else:
-        print(f"Unknown command: {args.command}")
+        print(f"Unknown command: {args.command}", file=sys.stderr)
         sys.exit(1)
 
 
