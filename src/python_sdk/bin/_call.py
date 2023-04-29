@@ -43,7 +43,7 @@ def call(
     sudo_binary: str = "sudo",
     environment_variables: dict[str, str] | None = None,
     stream_output: bool = False,
-    stream_printer: typing.Callable[[str], None] = functools.partial(print, end="", file=sys.stderr),
+    stream_printer: typing.Callable[[str], None] = functools.partial(print, end="", file=sys.stderr, flush=True),
     force_arch: typing.Literal["amd64", "x86_64"] | None = None,
     stdin: typing.TextIO | None = None,
     cwd: pathlib.Path | None = None,
@@ -107,10 +107,10 @@ def call(
     )
 
     output = ""
-    for line in iter(process.stdout.readline, ""):  # type: ignore
-        output += line
+    for char in iter(functools.partial(process.stdout.read, 1), ""):  # type: ignore
+        output += char
         if stream_output:
-            stream_printer(line)
+            stream_printer(char)
 
     logging.debug(
         f"Called command output. binary={binary_full_path} {command=} {output=} exit_code={process.returncode}"
