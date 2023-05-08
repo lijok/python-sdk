@@ -22,5 +22,6 @@ from python_sdk.config._config_value_validators import ValidateFileType as Valid
 from python_sdk.config._config_value_validators import ValidatePathIsExecutable as ValidatePathIsExecutable
 from python_sdk.config._config_value_validators import ValidatePathIsReadable as ValidatePathIsReadable
 from python_sdk.config._config_value_validators import ValidatePathIsWritable as ValidatePathIsWritable
+from python_sdk.config._config_value_validators import ValidateRegexMatch as ValidateRegexMatch
 from python_sdk.config._flags import disable_on_access_config_reloading as disable_on_access_config_reloading
 from python_sdk.config._flags import enable_on_access_config_reloading as enable_on_access_config_reloading

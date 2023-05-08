@@ -1,5 +1,6 @@
 import os
 import pathlib
+import re
 import typing
 
 if typing.TYPE_CHECKING:
@@ -130,6 +131,8 @@ class ValidateFileType:
     name: str = "Validate File Type"
     description: str = "Validates that the file at a given path is of set file type."
 
+    file_type: str
+
     def __init__(self, file_type: str) -> None:
         self.file_type = file_type if file_type[0] == "." else f".{file_type}"
 
@@ -145,3 +148,31 @@ class ValidateFileType:
         """
         if "".join(config_value.suffixes) != self.file_type:
             raise ConfigValueValidationError(f"{config_value} is not {self.file_type}")
+
+
+class ValidateRegexMatch:
+    name: str = "Validate Regex Match"
+    description: str = """
+    Validates that the passed value(s) match a regex pattern.
+    This can be used with strings and lists of strings.
+    """
+
+    pattern: re.Pattern
+
+    def __init__(self, pattern: str) -> None:
+        self.pattern = re.compile(pattern=pattern)
+
+    def __call__(
+        self,
+        config_option_name: str,
+        config_option: "_config_option.ConfigOption",
+        config_value: str | list[str],
+    ) -> None:
+        """
+        Raises:
+            ConfigValueValidationError: Value does not match regex pattern.
+        """
+        values_to_validate = config_value if isinstance(config_value, list) else [config_value]
+        for value in values_to_validate:
+            if not self.pattern.match(value):
+                raise ConfigValueValidationError(f"Value does not match regex pattern {self.pattern.pattern}")
