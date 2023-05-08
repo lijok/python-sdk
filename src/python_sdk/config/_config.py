@@ -10,6 +10,7 @@ from python_sdk.config import _config_option
 from python_sdk.config import _config_sources
 from python_sdk.config import _config_value_types
 from python_sdk.config import _config_value_validators
+from python_sdk.config import _flags
 
 if typing.TYPE_CHECKING:
     from python_sdk.config import _config_validators
@@ -39,6 +40,10 @@ class _ConfigMetaclass(type):
 
         if cls.meta.lazy_load_config and not cls.meta.loaded:
             cls._load_config()
+            attribute = super().__getattribute__(item)
+
+        if _flags.ENABLE_ON_ACCESS_CONFIG_RELOADING:
+            cls.reload_config()
             attribute = super().__getattribute__(item)
 
         return attribute.value
