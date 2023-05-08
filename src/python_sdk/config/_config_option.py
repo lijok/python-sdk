@@ -23,6 +23,7 @@ class ConfigOption:
     validators: list["_config_value_validators.ConfigValueValidator"]
     hardcoded: bool
     is_sensitive: bool
+    reload_compatible: bool
     _value: typing.Union["_config_value_types.ConfigValueType", sentinel.Sentinel, None]
     _encoded_value: str | sentinel.Sentinel
 
@@ -41,6 +42,7 @@ class ConfigOption:
         ] = Unset,
         validators: list["_config_value_validators.ConfigValueValidator"] | None = None,
         is_sensitive: bool = False,
+        reload_compatible: bool = False,
     ) -> None:
         self.name = name
         self.prefix = prefix
@@ -50,6 +52,7 @@ class ConfigOption:
         self.validators = validators or []
         self.hardcoded = False
         self.is_sensitive = is_sensitive
+        self.reload_compatbile = reload_compatible
         self._value = Unset
         self._encoded_value = Unset
 
@@ -144,7 +147,13 @@ def Option(
     description: str = "",
     is_sensitive: bool = False,
     validators: list["_config_value_validators.ConfigValueValidator"] | None = None,
+    reload_compatible: bool = True,
 ) -> typing.Any:
     return PartialConfigOption(
-        ConfigOption, default=default, description=description, is_sensitive=is_sensitive, validators=validators
+        ConfigOption,
+        default=default,
+        description=description,
+        is_sensitive=is_sensitive,
+        validators=validators,
+        reload_compatible=reload_compatible,
     )
