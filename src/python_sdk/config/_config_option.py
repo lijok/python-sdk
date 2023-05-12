@@ -85,12 +85,18 @@ class ConfigOption:
     @property
     def value(self) -> "_config_value_types.ConfigValueType":
         if self._value is not Unset:
-            return self._value
-        if self.default is not Unset:
-            return self.default
-        raise RuntimeError(
-            "Value not set at access time. This indicates a bug in python-sdk. Please raise a bug report."
-        )
+            value = self._value
+        elif self.default is not Unset:
+            value = self.default
+        else:
+            raise RuntimeError(
+                "Value not set at access time. This indicates a bug in python-sdk. Please raise a bug report."
+            )
+        if isinstance(value, str) and value.startswith(self.SECRET_REFERENCE_TOKEN):
+            from python_sdk import secrets
+
+            value = secrets.get_secret_value(key=value.removeprefix(self.SECRET_REFERENCE_TOKEN)).read().decode("utf-8")
+        return value
 
     @value.setter
     def value(self, maybe_encoded_value: typing.Union["_config_value_types.ConfigValueType", str, None]) -> None:

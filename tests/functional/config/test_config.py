@@ -104,3 +104,13 @@ def test_options_support_callable_defaults() -> None:
         TEST_KEY: dict[str, typing.Any] = config.Option(default=dict)
 
     assert Config.TEST_KEY == {}
+
+
+def test_options_support_secrets(random_aws_ps_secret_string: tuple[str, str]) -> None:
+    secret_key, secret_value = random_aws_ps_secret_string
+    os.environ["TEST_KEY"] = f"secret:{secret_key}"
+
+    class Config(config.Config):
+        TEST_KEY: str = config.Option()
+
+    assert Config.TEST_KEY == secret_value
