@@ -52,7 +52,7 @@ class ConfigOption:
         self.validators = validators or []
         self.hardcoded = False
         self.is_sensitive = is_sensitive
-        self.reload_compatbile = reload_compatible
+        self.reload_compatible = reload_compatible
         self._value = Unset
         self._encoded_value = Unset
 
