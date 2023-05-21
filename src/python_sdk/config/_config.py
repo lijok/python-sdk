@@ -96,7 +96,7 @@ class Config(metaclass=_ConfigMetaclass):
     # TODO?: remove `config` prefixes and suffixes
     def __init_subclass__(
         cls,
-        name: str = "Application Configuration",
+        name: str = "",
         description: str = "",
         option_prefix: str = "",
         config_sources: list["_config_sources.ConfigSource"] | None = None,
