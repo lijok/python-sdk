@@ -132,7 +132,10 @@ class ConfigOption:
 
     def _run_validators(self, config_value: "_config_value_types.ConfigValueType") -> None:
         for validator in self.validators:
-            validator(value=config_value)
+            try:
+                validator(value=config_value)
+            except _config_value_validators.ConfigValueValidationError as e:
+                raise _config_value_validators.ConfigValueValidationError(f"{self.name} value is invalid.") from e
 
 
 class PartialConfigOption(functools.partial[ConfigOption]):
