@@ -4,7 +4,6 @@
 import inspect
 import sys
 import threading
-import typing
 
 _registry: dict[str, "Sentinel"] = {}
 _lock = threading.Lock()
@@ -49,13 +48,13 @@ class Sentinel:
         # As per PEP 661, Sentinel instances are truthy by default
         return True
 
-    def __getnewargs__(self) -> typing.Tuple[str, str, str]:
+    def __getnewargs__(self) -> tuple[str, str, str]:
         # Get arguments for the __new__ method, for pickle serialization.
         # In combination with magic in the overriden __new__() method,
         # that allows to avoid constructing duplicates when un-pickling the object.
         return self._name, self._repr, self._module_name
 
-    def __reduce__(self) -> typing.Tuple[typing.Type["Sentinel"], typing.Tuple[str, str, str]]:
+    def __reduce__(self) -> tuple[type["Sentinel"], tuple[str, str, str]]:
         return self.__class__, (self._name, self._repr, self._module_name)
 
     @classmethod
