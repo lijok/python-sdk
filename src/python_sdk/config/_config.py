@@ -139,7 +139,6 @@ class Config(metaclass=_ConfigMetaclass):
             cls._load_config()
 
     def __init__(self) -> None:
-        # TODO: can we make this work with instantiation?
         raise TypeError("Config classes cannot be instantiated.")
 
     @classmethod
