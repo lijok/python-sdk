@@ -202,3 +202,30 @@ class ValidateDictKeysRegexMatch:
         for key in config_value:
             if not self.pattern.match(key):
                 raise ConfigValueValidationError(f"Key {key} does not match regex pattern {self.pattern.pattern}")
+
+
+class ValidateNumberRange:
+    name: str = "Validate Number Range"
+    description: str = """
+    Validates that the passed value is within a number range.
+    """
+
+    min: float
+    max: float
+
+    def __init__(self, min: float, max: float) -> None:
+        self.min = min
+        self.max = max
+
+    def __call__(
+        self,
+        config_option_name: str,
+        config_option: "_config_option.ConfigOption",
+        config_value: int | float,
+    ) -> None:
+        """
+        Raises:
+            ConfigValueValidationError: Value does not match regex pattern.
+        """
+        if not self.min <= config_value <= self.max:
+            raise ConfigValueValidationError(f"Value outside of {self.min} - {self.max} bounds.")
