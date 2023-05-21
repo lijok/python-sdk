@@ -153,7 +153,7 @@ def Option(
     description: str = "",
     is_sensitive: bool = False,
     validators: list["_config_value_validators.ConfigValueValidator"] | None = None,
-    reload_compatible: bool = True,
+    reload_compatible: bool = False,
 ) -> typing.Any:
     return PartialConfigOption(
         ConfigOption,
