@@ -37,9 +37,7 @@ class ConfigOption:
         prefix: str,
         datatype: type[_config_value_types.ConfigValueType],
         description: str = "",
-        default: _config_value_types.ConfigValueType
-        | typing.Callable[[], _config_value_types.ConfigValueType]
-        | sentinel.Sentinel = Unset,
+        default: _config_value_types.ConfigValueType | sentinel.Sentinel = Unset,
         validators: list[_config_value_validators.ConfigValueValidator] | None = None,
         is_sensitive: bool = False,
         reload_compatible: bool = False,
@@ -48,7 +46,7 @@ class ConfigOption:
         self.prefix = prefix
         self.description = description
         self.datatype = datatype
-        self.default = default() if callable(default) else default
+        self.default = default
         self.validators = validators or []
         self.hardcoded = False
         self.is_sensitive = is_sensitive
@@ -148,9 +146,7 @@ class PartialConfigOption(functools.partial[ConfigOption]):
 # class AppConfig(Config):
 #     LOGLEVEL: str = Option(default="INFO", description="Logs below this level will not be emitted.")
 def Option(
-    default: _config_value_types.ConfigValueType
-    | typing.Callable[[], _config_value_types.ConfigValueType]
-    | sentinel.Sentinel = Unset,
+    default: _config_value_types.ConfigValueType | sentinel.Sentinel = Unset,
     description: str = "",
     is_sensitive: bool = False,
     validators: list[_config_value_validators.ConfigValueValidator] | None = None,

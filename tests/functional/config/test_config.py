@@ -92,20 +92,6 @@ def test_config_value_when_set_is_retrieved_and_converted_correctly(
     assert getattr(cls, "TEST_KEY") == expected_value
 
 
-def test_options_support_lambda_defaults() -> None:
-    class Config(config.Config):
-        TEST_KEY: pathlib.Path = config.Option(default=lambda: pathlib.Path("/var"))
-
-    assert Config.TEST_KEY == pathlib.Path("/var")
-
-
-def test_options_support_callable_defaults() -> None:
-    class Config(config.Config):
-        TEST_KEY: dict[str, typing.Any] = config.Option(default=dict)
-
-    assert Config.TEST_KEY == {}
-
-
 def test_options_support_secrets(random_aws_ps_secret_string: tuple[str, str]) -> None:
     secret_key, secret_value = random_aws_ps_secret_string
     os.environ["TEST_KEY"] = f"secret:{secret_key}"
