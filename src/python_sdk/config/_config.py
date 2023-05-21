@@ -182,6 +182,10 @@ class Config(metaclass=_ConfigMetaclass):
         cls.post_load_hook()
 
     @classmethod
+    def load(cls) -> None:
+        cls._load_config()
+
+    @classmethod
     def validate(cls) -> None:
         for validator in cls.meta.validators:
             validator(config=cls)
