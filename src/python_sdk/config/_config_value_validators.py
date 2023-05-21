@@ -14,7 +14,7 @@ class ConfigValueValidator(typing.Protocol):
     name: str
     description: str
 
-    def __call__(self, config_value: typing.Any) -> None:
+    def __call__(self, value: typing.Any) -> None:
         """
         Raises:
             ConfigValueValidationError: Config value does not pass validation.
@@ -26,72 +26,72 @@ class ValidateFileExists:
     name: str = "Validate File Exists"
     description: str = "Validates that the file at a given path exists."
 
-    def __call__(self, config_value: pathlib.Path) -> None:
+    def __call__(self, value: pathlib.Path) -> None:
         """
         Raises:
             ConfigValueValidationError: Path does not exist or is not a directory.
         """
-        if not config_value.exists():
-            raise ConfigValueValidationError(f"File at {config_value} does not exist.")
-        if not config_value.is_file():
-            raise ConfigValueValidationError(f"{config_value} not a file.")
+        if not value.exists():
+            raise ConfigValueValidationError(f"File at {value} does not exist.")
+        if not value.is_file():
+            raise ConfigValueValidationError(f"{value} not a file.")
 
 
 class ValidateDirectoryExists:
     name: str = "Validate Directory Exists"
     description: str = "Validates that the directory at a given path exists."
 
-    def __call__(self, config_value: pathlib.Path) -> None:
+    def __call__(self, value: pathlib.Path) -> None:
         """
         Raises:
             ConfigValueValidationError: Path does not exist or is not a directory.
         """
-        if not config_value.exists():
-            raise ConfigValueValidationError(f"Directory at {config_value} does not exist.")
-        if not config_value.is_dir():
-            raise ConfigValueValidationError(f"{config_value} not a directory.")
+        if not value.exists():
+            raise ConfigValueValidationError(f"Directory at {value} does not exist.")
+        if not value.is_dir():
+            raise ConfigValueValidationError(f"{value} not a directory.")
 
 
 class ValidatePathIsReadable:
     name: str = "Validate Path is Readable"
     description: str = "Validates that a given path is readable."
 
-    def __call__(self, config_value: pathlib.Path) -> None:
+    def __call__(self, value: pathlib.Path) -> None:
         """
         Raises:
             ConfigValueValidationError: Path is not readable.
         """
-        path_to_evaluate = config_value if config_value.exists() else config_value.parent
+        path_to_evaluate = value if value.exists() else value.parent
         if not os.access(path_to_evaluate, os.R_OK):
-            raise ConfigValueValidationError(f"{config_value} is not readable.")
+            raise ConfigValueValidationError(f"{value} is not readable.")
 
 
 class ValidatePathIsWritable:
     name: str = "Validate Path is Writable"
     description: str = "Validates that a given path is writeable."
 
-    def __call__(self, config_value: pathlib.Path) -> None:
+    def __call__(self, value: pathlib.Path) -> None:
         """
         Raises:
             ConfigValueValidationError: Path is not writeable.
         """
-        path_to_evaluate = config_value if config_value.exists() else config_value.parent
+        path_to_evaluate = value if value.exists() else value.parent
         if not os.access(path_to_evaluate, os.W_OK):
-            raise ConfigValueValidationError(f"{config_value} is not writeable")
+            raise ConfigValueValidationError(f"{value} is not writeable")
 
 
 class ValidatePathIsExecutable:
     name: str = "Validate Path is Executable"
     description: str = "Validates that a given path is executable."
 
-    def __call__(self, config_value: pathlib.Path) -> None:
+    def __call__(self, value: pathlib.Path) -> None:
         """
         Raises:
             ConfigValueValidationError: Path is not executable.
         """
-        path_to_evaluate = config_value if config_value.exists() else config_value.parent
+        path_to_evaluate = value if value.exists() else value.parent
         if not os.access(path_to_evaluate, os.EX_OK):
-            raise ConfigValueValidationError(f"{config_value} is not executable")
+            raise ConfigValueValidationError(f"{value} is not executable")
 
 
 class ValidateFileType:
@@ -103,13 +103,13 @@ class ValidateFileType:
     def __init__(self, file_type: str) -> None:
         self.file_type = file_type if file_type[0] == "." else f".{file_type}"
 
-    def __call__(self, config_value: pathlib.Path) -> None:
+    def __call__(self, value: pathlib.Path) -> None:
         """
         Raises:
             ConfigValueValidationError: Path is not of correct file type.
         """
-        if "".join(config_value.suffixes) != self.file_type:
-            raise ConfigValueValidationError(f"{config_value} is not {self.file_type}")
+        if "".join(value.suffixes) != self.file_type:
+            raise ConfigValueValidationError(f"{value} is not {self.file_type}")
 
 
 class ValidateRegexMatch:
@@ -124,12 +124,12 @@ class ValidateRegexMatch:
     def __init__(self, pattern: str) -> None:
         self.pattern = re.compile(pattern=pattern)
 
-    def __call__(self, config_value: str | list[str]) -> None:
+    def __call__(self, value: str | list[str]) -> None:
         """
         Raises:
             ConfigValueValidationError: Value does not match regex pattern.
         """
-        values_to_validate = config_value if isinstance(config_value, list) else [config_value]
+        values_to_validate = value if isinstance(value, list) else [value]
         for value in values_to_validate:
             if not self.pattern.match(value):
                 raise ConfigValueValidationError(f"Value does not match regex pattern {self.pattern.pattern}")
@@ -146,12 +146,12 @@ class ValidateDictKeysRegexMatch:
     def __init__(self, pattern: str) -> None:
         self.pattern = re.compile(pattern=pattern)
 
-    def __call__(self, config_value: dict[str, typing.Any]) -> None:
+    def __call__(self, value: dict[str, typing.Any]) -> None:
         """
         Raises:
             ConfigValueValidationError: Value does not match regex pattern.
         """
-        for key in config_value:
+        for key in value:
             if not self.pattern.match(key):
                 raise ConfigValueValidationError(f"Key {key} does not match regex pattern {self.pattern.pattern}")
 
@@ -169,10 +169,10 @@ class ValidateNumberRange:
         self.min = min
         self.max = max
 
-    def __call__(self, config_value: int | float) -> None:
+    def __call__(self, value: int | float) -> None:
         """
         Raises:
             ConfigValueValidationError: Value does not match regex pattern.
         """
-        if not self.min <= config_value <= self.max:
+        if not self.min <= value <= self.max:
             raise ConfigValueValidationError(f"Value outside of {self.min} - {self.max} bounds.")

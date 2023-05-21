@@ -132,7 +132,7 @@ class ConfigOption:
 
     def _run_validators(self, config_value: "_config_value_types.ConfigValueType") -> None:
         for validator in self.validators:
-            validator(config_value=config_value)
+            validator(value=config_value)
 
 
 class PartialConfigOption(functools.partial[ConfigOption]):
