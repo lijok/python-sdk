@@ -16,12 +16,6 @@ from python_sdk.config import _flags
 Unset: sentinel.Sentinel = sentinel.Sentinel("Unset")
 
 
-# TODO: get_documentation function at module level which pulls out docs from all configuration objects
-# TODO: registry of tuples of all Config classes and all of their config options, so we can fetch documentation for it
-# and also append to it manually options which are only available through plain environment variables, e.g., in this
-# module
-
-
 class _ConfigMetaclass(type):
     def __str__(cls) -> str:
         # TODO
@@ -90,8 +84,6 @@ class Config(metaclass=_ConfigMetaclass):
     meta: _ConfigMeta
 
     # TODO: config cache
-    # TODO: how do we allow ops to configure some of these options?
-    # TODO?: remove `config` prefixes and suffixes
     def __init_subclass__(
         cls,
         name: str = "",
@@ -99,7 +91,7 @@ class Config(metaclass=_ConfigMetaclass):
         option_prefix: str = "",
         config_sources: list[_config_sources.ConfigSource] | None = None,
         lazy_load: bool = False,
-        validators: list[_config_validators.ConfigValidator] | None = None,  # TODO: this or function
+        validators: list[_config_validators.ConfigValidator] | None = None,
     ) -> None:
         super().__init_subclass__()
 
