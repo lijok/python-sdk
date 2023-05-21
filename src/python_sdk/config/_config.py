@@ -49,6 +49,7 @@ class _ConfigMeta:
     config_sources: list[_config_sources.ConfigSource]
     lazy_load: bool
     validators: list[_config_validators.ConfigValidator]
+    warn_about_unused_configured_options: bool
     last_loaded_at: datetime.datetime | None = None
     _loaded: bool = False
 
@@ -60,6 +61,7 @@ class _ConfigMeta:
         config_sources: list[_config_sources.ConfigSource],
         lazy_load: bool,
         validators: list[_config_validators.ConfigValidator],
+        warn_about_unused_configured_options: bool,
     ) -> None:
         self.name = name
         self.description = description
@@ -67,6 +69,7 @@ class _ConfigMeta:
         self.config_sources = config_sources
         self.lazy_load = lazy_load
         self.validators = validators
+        self.warn_about_unused_configured_options = warn_about_unused_configured_options
         self.last_loaded_at = None
         self._loaded = False
 
@@ -92,6 +95,7 @@ class Config(metaclass=_ConfigMetaclass):
         config_sources: list[_config_sources.ConfigSource] | None = None,
         lazy_load: bool = False,
         validators: list[_config_validators.ConfigValidator] | None = None,
+        warn_about_unused_configured_options: bool = True,
     ) -> None:
         super().__init_subclass__()
 
@@ -128,6 +132,7 @@ class Config(metaclass=_ConfigMetaclass):
             config_sources=config_sources or _get_config_sources(),
             lazy_load=lazy_load,
             validators=validators or [],
+            warn_about_unused_configured_options=warn_about_unused_configured_options,
         )
 
         if not cls.meta.lazy_load:
@@ -160,12 +165,10 @@ class Config(metaclass=_ConfigMetaclass):
                     f"Required config option {config_option.fully_qualified_name} with no default was not set."
                 )
 
-        # TODO: Temporarily commented out 'cause can be very disruptive. Need to think of a way to toggle this.
-        # if (
-        #     cls.meta.option_prefix
-        # ):  # If no option_prefix, all env vars would be pulled in, and we would warn for each one.
-        #     for unused_config_option in config_data:
-        #         logging.warning(f"Config option {unused_config_option} not supported by {cls.meta.name}.")
+        # If no option_prefix, all env vars would be pulled in, and we would warn for each one.
+        if cls.meta.option_prefix and cls.meta.warn_about_unused_configured_options:
+            for unused_config_option in config_data:
+                logging.warning(f"Config option {unused_config_option} not supported by {cls.meta.name}.")
 
         cls.meta.loaded = True
         cls.validate()
