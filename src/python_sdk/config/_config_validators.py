@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing
 
 if typing.TYPE_CHECKING:
@@ -12,7 +14,7 @@ class ConfigValidator(typing.Protocol):
     name: str
     description: str
 
-    def __call__(self, config: type["_config.Config"]) -> None:
+    def __call__(self, config: type[_config.Config]) -> None:
         """
         Raises:
             ConfigValidationError: Config does not pass validation.

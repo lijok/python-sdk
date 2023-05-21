@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import base64
 import pathlib
 import typing
@@ -10,7 +12,7 @@ class Base64EncodedString(str):
 
     encoding: str = "utf-8"
 
-    def __new__(cls, string: str) -> "Base64EncodedString":
+    def __new__(cls, string: str) -> Base64EncodedString:
         if not string:
             raise ValueError()
         base64.b64decode(string, validate=True).decode(cls.encoding)  # check it can be decoded

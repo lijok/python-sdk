@@ -8,12 +8,10 @@ import python_sdk
 from python_sdk import sentinel
 from python_sdk.config import _config_option
 from python_sdk.config import _config_sources
+from python_sdk.config import _config_validators
 from python_sdk.config import _config_value_types
 from python_sdk.config import _config_value_validators
 from python_sdk.config import _flags
-
-if typing.TYPE_CHECKING:
-    from python_sdk.config import _config_validators
 
 Unset: sentinel.Sentinel = sentinel.Sentinel("Unset")
 
@@ -54,9 +52,9 @@ class _ConfigMeta:
     name: str
     description: str
     option_prefix: str
-    config_sources: list["_config_sources.ConfigSource"]
+    config_sources: list[_config_sources.ConfigSource]
     lazy_load: bool
-    validators: list["_config_validators.ConfigValidator"]
+    validators: list[_config_validators.ConfigValidator]
     last_loaded_at: datetime.datetime | None = None
     _loaded: bool = False
 
@@ -65,9 +63,9 @@ class _ConfigMeta:
         name: str,
         description: str,
         option_prefix: str,
-        config_sources: list["_config_sources.ConfigSource"],
+        config_sources: list[_config_sources.ConfigSource],
         lazy_load: bool,
-        validators: list["_config_validators.ConfigValidator"],
+        validators: list[_config_validators.ConfigValidator],
     ) -> None:
         self.name = name
         self.description = description
@@ -99,9 +97,9 @@ class Config(metaclass=_ConfigMetaclass):
         name: str = "",
         description: str = "",
         option_prefix: str = "",
-        config_sources: list["_config_sources.ConfigSource"] | None = None,
+        config_sources: list[_config_sources.ConfigSource] | None = None,
         lazy_load: bool = False,
-        validators: list["_config_validators.ConfigValidator"] | None = None,  # TODO: this or function
+        validators: list[_config_validators.ConfigValidator] | None = None,  # TODO: this or function
     ) -> None:
         super().__init_subclass__()
 
@@ -294,7 +292,7 @@ class ConfigSourcesConfig(
             )
 
 
-def _get_config_sources() -> list["_config_sources.ConfigSource"]:
+def _get_config_sources() -> list[_config_sources.ConfigSource]:
     if ConfigSourcesConfig.SOURCE == "ENVIRONMENT_VARIABLES":
         return [_config_sources.EnvironmentVariables()]
     elif ConfigSourcesConfig.SOURCE == "LOCAL_FILE":

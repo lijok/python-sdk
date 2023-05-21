@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import functools
 import typing
@@ -18,13 +20,13 @@ class ConfigOption:
     name: str
     prefix: str
     description: str
-    datatype: type["_config_value_types.ConfigValueType"]
-    default: typing.Union["_config_value_types.ConfigValueType", sentinel.Sentinel, None]
-    validators: list["_config_value_validators.ConfigValueValidator"]
+    datatype: type[_config_value_types.ConfigValueType]
+    default: _config_value_types.ConfigValueType | sentinel.Sentinel | None
+    validators: list[_config_value_validators.ConfigValueValidator]
     hardcoded: bool
     is_sensitive: bool
     reload_compatible: bool
-    _value: typing.Union["_config_value_types.ConfigValueType", sentinel.Sentinel, None]
+    _value: _config_value_types.ConfigValueType | sentinel.Sentinel | None
     _encoded_value: str | sentinel.Sentinel
 
     SECRET_REFERENCE_TOKEN: str = "secret:"
@@ -33,14 +35,12 @@ class ConfigOption:
         self,
         name: str,
         prefix: str,
-        datatype: type["_config_value_types.ConfigValueType"],
+        datatype: type[_config_value_types.ConfigValueType],
         description: str = "",
-        default: typing.Union[
-            "_config_value_types.ConfigValueType",
-            typing.Callable[[], "_config_value_types.ConfigValueType"],
-            sentinel.Sentinel,
-        ] = Unset,
-        validators: list["_config_value_validators.ConfigValueValidator"] | None = None,
+        default: _config_value_types.ConfigValueType
+        | typing.Callable[[], _config_value_types.ConfigValueType]
+        | sentinel.Sentinel = Unset,
+        validators: list[_config_value_validators.ConfigValueValidator] | None = None,
         is_sensitive: bool = False,
         reload_compatible: bool = False,
     ) -> None:
@@ -83,7 +83,7 @@ class ConfigOption:
         )
 
     @property
-    def value(self) -> "_config_value_types.ConfigValueType":
+    def value(self) -> _config_value_types.ConfigValueType:
         if self._value is not Unset:
             value = self._value
         elif self.default is not Unset:
@@ -99,7 +99,7 @@ class ConfigOption:
         return value
 
     @value.setter
-    def value(self, maybe_encoded_value: typing.Union["_config_value_types.ConfigValueType", str, None]) -> None:
+    def value(self, maybe_encoded_value: _config_value_types.ConfigValueType | str | None) -> None:
         if self.hardcoded:
             return
 
@@ -125,12 +125,12 @@ class ConfigOption:
         self._value = value
         self._encoded_value = maybe_encoded_value
 
-    def hardcode_value(self, value: "_config_value_types.ConfigValueType") -> None:
+    def hardcode_value(self, value: _config_value_types.ConfigValueType) -> None:
         self.hardcoded = False
         self.value = value
         self.hardcoded = True
 
-    def _run_validators(self, config_value: "_config_value_types.ConfigValueType") -> None:
+    def _run_validators(self, config_value: _config_value_types.ConfigValueType) -> None:
         for validator in self.validators:
             try:
                 validator(value=config_value)
@@ -148,14 +148,12 @@ class PartialConfigOption(functools.partial[ConfigOption]):
 # class AppConfig(Config):
 #     LOGLEVEL: str = Option(default="INFO", description="Logs below this level will not be emitted.")
 def Option(
-    default: typing.Union[
-        "_config_value_types.ConfigValueType",
-        typing.Callable[[], typing.Union["_config_value_types.ConfigValueType"]],
-        sentinel.Sentinel,
-    ] = Unset,
+    default: _config_value_types.ConfigValueType
+    | typing.Callable[[], _config_value_types.ConfigValueType]
+    | sentinel.Sentinel = Unset,
     description: str = "",
     is_sensitive: bool = False,
-    validators: list["_config_value_validators.ConfigValueValidator"] | None = None,
+    validators: list[_config_value_validators.ConfigValueValidator] | None = None,
     reload_compatible: bool = False,
 ) -> typing.Any:
     return PartialConfigOption(
