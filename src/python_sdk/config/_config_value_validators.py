@@ -3,9 +3,6 @@ import pathlib
 import re
 import typing
 
-if typing.TYPE_CHECKING:
-    from python_sdk.config import _config_option
-
 
 class ConfigValueValidationError(Exception):
     """Config Value does not pass validation."""
@@ -17,12 +14,7 @@ class ConfigValueValidator(typing.Protocol):
     name: str
     description: str
 
-    def __call__(
-        self,
-        config_option_name: str,
-        config_option: "_config_option.ConfigOption",
-        config_value: typing.Any,
-    ) -> None:
+    def __call__(self, config_value: typing.Any) -> None:
         """
         Raises:
             ConfigValueValidationError: Config value does not pass validation.
@@ -34,12 +26,7 @@ class ValidateFileExists:
     name: str = "Validate File Exists"
     description: str = "Validates that the file at a given path exists."
 
-    def __call__(
-        self,
-        config_option_name: str,
-        config_option: "_config_option.ConfigOption",
-        config_value: pathlib.Path,
-    ) -> None:
+    def __call__(self, config_value: pathlib.Path) -> None:
         """
         Raises:
             ConfigValueValidationError: Path does not exist or is not a directory.
@@ -54,12 +41,7 @@ class ValidateDirectoryExists:
     name: str = "Validate Directory Exists"
     description: str = "Validates that the directory at a given path exists."
 
-    def __call__(
-        self,
-        config_option_name: str,
-        config_option: "_config_option.ConfigOption",
-        config_value: pathlib.Path,
-    ) -> None:
+    def __call__(self, config_value: pathlib.Path) -> None:
         """
         Raises:
             ConfigValueValidationError: Path does not exist or is not a directory.
@@ -74,12 +56,7 @@ class ValidatePathIsReadable:
     name: str = "Validate Path is Readable"
     description: str = "Validates that a given path is readable."
 
-    def __call__(
-        self,
-        config_option_name: str,
-        config_option: "_config_option.ConfigOption",
-        config_value: pathlib.Path,
-    ) -> None:
+    def __call__(self, config_value: pathlib.Path) -> None:
         """
         Raises:
             ConfigValueValidationError: Path is not readable.
@@ -93,12 +70,7 @@ class ValidatePathIsWritable:
     name: str = "Validate Path is Writable"
     description: str = "Validates that a given path is writeable."
 
-    def __call__(
-        self,
-        config_option_name: str,
-        config_option: "_config_option.ConfigOption",
-        config_value: pathlib.Path,
-    ) -> None:
+    def __call__(self, config_value: pathlib.Path) -> None:
         """
         Raises:
             ConfigValueValidationError: Path is not writeable.
@@ -112,12 +84,7 @@ class ValidatePathIsExecutable:
     name: str = "Validate Path is Executable"
     description: str = "Validates that a given path is executable."
 
-    def __call__(
-        self,
-        config_option_name: str,
-        config_option: "_config_option.ConfigOption",
-        config_value: pathlib.Path,
-    ) -> None:
+    def __call__(self, config_value: pathlib.Path) -> None:
         """
         Raises:
             ConfigValueValidationError: Path is not executable.
@@ -136,12 +103,7 @@ class ValidateFileType:
     def __init__(self, file_type: str) -> None:
         self.file_type = file_type if file_type[0] == "." else f".{file_type}"
 
-    def __call__(
-        self,
-        config_option_name: str,
-        config_option: "_config_option.ConfigOption",
-        config_value: pathlib.Path,
-    ) -> None:
+    def __call__(self, config_value: pathlib.Path) -> None:
         """
         Raises:
             ConfigValueValidationError: Path is not of correct file type.
@@ -162,12 +124,7 @@ class ValidateRegexMatch:
     def __init__(self, pattern: str) -> None:
         self.pattern = re.compile(pattern=pattern)
 
-    def __call__(
-        self,
-        config_option_name: str,
-        config_option: "_config_option.ConfigOption",
-        config_value: str | list[str],
-    ) -> None:
+    def __call__(self, config_value: str | list[str]) -> None:
         """
         Raises:
             ConfigValueValidationError: Value does not match regex pattern.
@@ -189,12 +146,7 @@ class ValidateDictKeysRegexMatch:
     def __init__(self, pattern: str) -> None:
         self.pattern = re.compile(pattern=pattern)
 
-    def __call__(
-        self,
-        config_option_name: str,
-        config_option: "_config_option.ConfigOption",
-        config_value: dict[str, typing.Any],
-    ) -> None:
+    def __call__(self, config_value: dict[str, typing.Any]) -> None:
         """
         Raises:
             ConfigValueValidationError: Value does not match regex pattern.
@@ -217,12 +169,7 @@ class ValidateNumberRange:
         self.min = min
         self.max = max
 
-    def __call__(
-        self,
-        config_option_name: str,
-        config_option: "_config_option.ConfigOption",
-        config_value: int | float,
-    ) -> None:
+    def __call__(self, config_value: int | float) -> None:
         """
         Raises:
             ConfigValueValidationError: Value does not match regex pattern.
