@@ -38,7 +38,7 @@ class _ConfigMetaclass(type):
         if not isinstance(attribute, _config_option.ConfigOption):
             return attribute
 
-        if cls.meta.lazy_load_config and not cls.meta.loaded:
+        if cls.meta.lazy_load and not cls.meta.loaded:
             cls._load_config()
             attribute = super().__getattribute__(item)
 
@@ -55,7 +55,7 @@ class _ConfigMeta:
     description: str
     option_prefix: str
     config_sources: list["_config_sources.ConfigSource"]
-    lazy_load_config: bool
+    lazy_load: bool
     validators: list["_config_validators.ConfigValidator"]
     last_loaded_at: datetime.datetime | None = None
     _loaded: bool = False
@@ -66,14 +66,14 @@ class _ConfigMeta:
         description: str,
         option_prefix: str,
         config_sources: list["_config_sources.ConfigSource"],
-        lazy_load_config: bool,
+        lazy_load: bool,
         validators: list["_config_validators.ConfigValidator"],
     ) -> None:
         self.name = name
         self.description = description
         self.option_prefix = option_prefix
         self.config_sources = config_sources
-        self.lazy_load_config = lazy_load_config
+        self.lazy_load = lazy_load
         self.validators = validators
         self.last_loaded_at = None
         self._loaded = False
@@ -100,7 +100,7 @@ class Config(metaclass=_ConfigMetaclass):
         description: str = "",
         option_prefix: str = "",
         config_sources: list["_config_sources.ConfigSource"] | None = None,
-        lazy_load_config: bool = False,
+        lazy_load: bool = False,
         validators: list["_config_validators.ConfigValidator"] | None = None,  # TODO: this or function
     ) -> None:
         super().__init_subclass__()
@@ -136,11 +136,11 @@ class Config(metaclass=_ConfigMetaclass):
             description=description,
             option_prefix=option_prefix,
             config_sources=config_sources or _get_config_sources(),
-            lazy_load_config=lazy_load_config,
+            lazy_load=lazy_load,
             validators=validators or [],
         )
 
-        if not cls.meta.lazy_load_config:
+        if not cls.meta.lazy_load:
             cls._load_config()
 
     def __init__(self) -> None:
