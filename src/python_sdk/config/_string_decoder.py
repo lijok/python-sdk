@@ -51,24 +51,24 @@ def _str_to_literal(string: str, literal: type) -> str:
 
 
 def _str_to_list_of_strs(string: str) -> list[str]:
-    string = string.strip().strip(ENCODED_STRING_LIST_SEPARATOR)
-    if not string:
+    if string := string.strip().strip(ENCODED_STRING_LIST_SEPARATOR):
+        return string.split(ENCODED_STRING_LIST_SEPARATOR)
+    else:
         raise ValueError()
-    return string.split(ENCODED_STRING_LIST_SEPARATOR)
 
 
 def _str_to_list_of_ints(string: str) -> list[int]:
-    string = string.strip().strip(ENCODED_STRING_LIST_SEPARATOR)
-    if not string:
+    if string := string.strip().strip(ENCODED_STRING_LIST_SEPARATOR):
+        return [int(i) for i in string.split(ENCODED_STRING_LIST_SEPARATOR)]
+    else:
         raise ValueError()
-    return [int(i) for i in string.split(ENCODED_STRING_LIST_SEPARATOR)]
 
 
 def _str_to_list_of_floats(string: str) -> list[float]:
-    string = string.strip().strip(ENCODED_STRING_LIST_SEPARATOR)
-    if not string:
+    if string := string.strip().strip(ENCODED_STRING_LIST_SEPARATOR):
+        return [float(i) for i in string.split(ENCODED_STRING_LIST_SEPARATOR)]
+    else:
         raise ValueError()
-    return [float(i) for i in string.split(ENCODED_STRING_LIST_SEPARATOR)]
 
 
 def _str_to_list_of_base64_encoded_strings(string: str) -> list[str]:
