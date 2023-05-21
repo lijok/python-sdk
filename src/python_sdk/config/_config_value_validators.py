@@ -176,3 +176,29 @@ class ValidateRegexMatch:
         for value in values_to_validate:
             if not self.pattern.match(value):
                 raise ConfigValueValidationError(f"Value does not match regex pattern {self.pattern.pattern}")
+
+
+class ValidateDictKeysRegexMatch:
+    name: str = "Validate Dict Keys Regex Match"
+    description: str = """
+    Validates that the passed dictionary keys match a regex pattern.
+    """
+
+    pattern: re.Pattern
+
+    def __init__(self, pattern: str) -> None:
+        self.pattern = re.compile(pattern=pattern)
+
+    def __call__(
+        self,
+        config_option_name: str,
+        config_option: "_config_option.ConfigOption",
+        config_value: dict[str, typing.Any],
+    ) -> None:
+        """
+        Raises:
+            ConfigValueValidationError: Value does not match regex pattern.
+        """
+        for key in config_value:
+            if not self.pattern.match(key):
+                raise ConfigValueValidationError(f"Key {key} does not match regex pattern {self.pattern.pattern}")
