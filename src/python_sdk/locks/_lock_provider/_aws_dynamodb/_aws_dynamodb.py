@@ -171,7 +171,7 @@ class AWSDynamoDBLock:
             Key={self.partition_key: {"S": self.key}},
             ConsistentRead=True,
         )
-        if "Item" not in response:
+        if "Item" not in response or not response["Item"]:
             return _protocol.LockInfo(
                 key=self.key,
                 object=None,
@@ -260,6 +260,8 @@ class AWSDynamoDBLock:
                     )
                     raise
 
+        raise RuntimeError()  # Not reachable
+
     async def _acquire(self) -> _protocol.LockInfo:
         self._held_since = datetime.datetime.now(tz=datetime.timezone.utc)
         new_lock = self._new_lock_info
@@ -289,7 +291,6 @@ class AWSDynamoDBLock:
                     ":is_permanent": {"BOOL": False},
                     ":current_datetime": {"S": datetime.datetime.now(tz=datetime.timezone.utc).isoformat()},
                 },
-                ReturnValuesOnConditionCheckFailure="ALL_OLD",
             )
         except botocore.exceptions.ClientError as e:
             error_code = e.response["Error"]["Code"]
@@ -330,6 +331,7 @@ class AWSDynamoDBLock:
             raise _exceptions.LockIsPermanent(current_lock=await self.current_lock)
 
         new_lock = self._new_lock_info
+        assert new_lock.owner_guid  # mypy hint
 
         logging.debug(
             "Refreshing lock. "
@@ -353,7 +355,6 @@ class AWSDynamoDBLock:
                 ExpressionAttributeValues={
                     ":owner_guid": {"S": new_lock.owner_guid},
                 },
-                ReturnValuesOnConditionCheckFailure="ALL_OLD",
             )
         except botocore.exceptions.ClientError as e:
             error_code = e.response["Error"]["Code"]
@@ -391,6 +392,7 @@ class AWSDynamoDBLock:
         self.ttl = None
 
         new_lock = self._new_lock_info
+        assert new_lock.owner_guid  # mypy hint
 
         logging.debug(
             "Making lock permanent. "
@@ -414,7 +416,6 @@ class AWSDynamoDBLock:
                 ExpressionAttributeValues={
                     ":owner_guid": {"S": new_lock.owner_guid},
                 },
-                ReturnValuesOnConditionCheckFailure="ALL_OLD",
             )
         except botocore.exceptions.ClientError as e:
             error_code = e.response["Error"]["Code"]
@@ -461,7 +462,6 @@ class AWSDynamoDBLock:
                     ":owner_guid": {"S": self._owner_guid},
                     ":is_permanent": {"BOOL": False},
                 },
-                ReturnValuesOnConditionCheckFailure="ALL_OLD",
             )
         except botocore.exceptions.ClientError as e:
             error_code = e.response["Error"]["Code"]
@@ -533,7 +533,7 @@ class AWSDynamoDBLock:
             metadata=self.metadata,
             is_permanent=self.is_permanent,
             acquired_at=now,
-            expires_at=None if self.is_permanent else now + self.ttl,
+            expires_at=now + self.ttl if self.ttl else None,
             is_owned_by_me=True,
             exists=True,
             owner_guid=self._owner_guid,
@@ -543,13 +543,13 @@ class AWSDynamoDBLock:
     def _lock_info_to_aws_dynamodb_record(self, lock_info: _protocol.LockInfo) -> dict[str, typing.Any]:
         data = {
             self.partition_key: lock_info.key,
-            "hostname": lock_info.hostname,
-            "acquired_at": lock_info.acquired_at.isoformat(),
-            "ttl": decimal.Decimal(str(lock_info.ttl.total_seconds())) if lock_info.ttl else None,
-            "expires_at": lock_info.expires_at.isoformat() if lock_info.expires_at else None,
             self.object_key: lock_info.object,
+            "hostname": lock_info.hostname,
+            "ttl": decimal.Decimal(str(lock_info.ttl.total_seconds())) if lock_info.ttl else None,
             "metadata": lock_info.metadata,
             "is_permanent": lock_info.is_permanent,
+            "acquired_at": lock_info.acquired_at.isoformat() if lock_info.acquired_at else None,
+            "expires_at": lock_info.expires_at.isoformat() if lock_info.expires_at else None,
             "owner_guid": lock_info.owner_guid,
             "held_since": lock_info.held_since.isoformat() if lock_info.held_since else None,
         }

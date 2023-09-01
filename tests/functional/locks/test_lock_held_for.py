@@ -16,4 +16,6 @@ async def test_held_for_ticks_upwards(lock_provider: locks.LockProvider, lock_ke
     now = lock_info.held_for
     await asyncio.sleep(0)
     later = lock_info.held_for
+    assert now
+    assert later
     assert now < later
