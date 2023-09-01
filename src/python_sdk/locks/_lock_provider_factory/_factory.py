@@ -1,8 +1,8 @@
 import typing
 
 from python_sdk.locks import _lock_provider
-from python_sdk.locks._factory import _aws_dynamodb_config
-from python_sdk.locks._factory import _s3_config
+from python_sdk.locks._lock_provider_factory import _aws_dynamodb_config
+from python_sdk.locks._lock_provider_factory import _s3_config
 
 LockProviderConfig: typing.TypeAlias = _s3_config.S3Config | _aws_dynamodb_config.AWSDynamoDBConfig
 
