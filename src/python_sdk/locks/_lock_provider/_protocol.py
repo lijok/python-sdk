@@ -4,6 +4,8 @@ import datetime
 import types
 import typing
 
+ObjectType: typing.TypeAlias = str | dict[str, typing.Any]
+
 
 class LockProvider(typing.Protocol):
     hostname: str
@@ -25,7 +27,7 @@ class LockProvider(typing.Protocol):
     def lock(
         self,
         key: str,
-        object: typing.Any | None = None,
+        object: ObjectType | None = None,
         ttl: datetime.timedelta | None = None,
         additional_metadata: dict[str, str] | None = None,
         retry_times: int | None = None,
@@ -36,7 +38,7 @@ class LockProvider(typing.Protocol):
     def permanent_lock(
         self,
         key: str,
-        object: typing.Any | None = None,
+        object: ObjectType | None = None,
         additional_metadata: dict[str, str] | None = None,
         retry_times: int | None = None,
         retry_delay: datetime.timedelta | None = None,
@@ -46,7 +48,7 @@ class LockProvider(typing.Protocol):
 
 class Lock(typing.Protocol):
     key: str
-    object: typing.Any | None
+    object: ObjectType | None
     hostname: str
     ttl: datetime.timedelta | None
     metadata: dict[str, str]
@@ -142,7 +144,7 @@ class Lock(typing.Protocol):
 
 class LockInfo:
     key: str
-    object: typing.Any | None
+    object: ObjectType | None
     hostname: str | None
     ttl: datetime.timedelta | None
     metadata: dict[str, str] | None
@@ -157,7 +159,7 @@ class LockInfo:
     def __init__(
         self,
         key: str,
-        object: typing.Any | None,
+        object: ObjectType | None,
         hostname: str | None,
         ttl: datetime.timedelta | None,
         metadata: dict[str, str] | None,

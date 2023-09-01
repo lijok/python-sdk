@@ -5,15 +5,14 @@ import pytest
 from python_sdk import locks
 
 
-# TODO: Restrict object types
 @pytest.mark.parametrize(
     "object",
     [
         "test",
-        123,
         {"test": "Test"},
+        {"test": {"Test": "test"}},
+        {"test": ["test"]},
         '{"test": "Test"}',
-        # b"test",
         None,
     ],
 )

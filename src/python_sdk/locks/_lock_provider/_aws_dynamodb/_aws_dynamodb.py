@@ -62,7 +62,7 @@ class AWSDynamoDBLockProvider:
     def lock(
         self,
         key: str,
-        object: typing.Any | None = None,
+        object: _protocol.ObjectType | None = None,
         ttl: datetime.timedelta | None = None,
         additional_metadata: dict[str, str] | None = None,
         retry_times: int | None = None,
@@ -89,7 +89,7 @@ class AWSDynamoDBLockProvider:
     def permanent_lock(
         self,
         key: str,
-        object: typing.Any | None = None,
+        object: _protocol.ObjectType | None = None,
         additional_metadata: dict[str, str] | None = None,
         retry_times: int | None = None,
         retry_delay: datetime.timedelta | None = None,
@@ -114,7 +114,7 @@ class AWSDynamoDBLockProvider:
 
 class AWSDynamoDBLock:
     key: str
-    object: typing.Any | None
+    object: _protocol.ObjectType | None
     hostname: str
     ttl: datetime.timedelta | None
     metadata: dict[str, str]
@@ -132,7 +132,7 @@ class AWSDynamoDBLock:
     def __init__(
         self,
         key: str,
-        object: typing.Any | None,
+        object: _protocol.ObjectType | None,
         hostname: str,
         ttl: datetime.timedelta | None,
         metadata: dict[str, str],
