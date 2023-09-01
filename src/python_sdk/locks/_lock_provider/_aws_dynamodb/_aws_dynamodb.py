@@ -23,7 +23,6 @@ class AWSDynamoDBLockProvider:
     """
     Implements a lock provider using AWS DynamoDB.
 
-    To use this provider, an AWS DynamoDB table must exist with a partition key of schema: LockID: S.
     Note that AWS DynamoDB records can only be up to 400KB in size. Avoid creating locks with large objects.
     """
 
