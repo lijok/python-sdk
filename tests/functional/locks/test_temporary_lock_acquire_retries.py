@@ -6,7 +6,7 @@ from python_sdk import locks
 
 
 class TestTemporaryLockAcquireRetries:
-    async def await_with_delay(self, awaitable: typing.Awaitable, delay: datetime.timedelta) -> None:
+    async def await_with_delay(self, awaitable: typing.Awaitable[None], delay: datetime.timedelta) -> None:
         await asyncio.sleep(delay.total_seconds())
         await awaitable
 

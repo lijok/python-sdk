@@ -12,10 +12,12 @@ from python_sdk import locks
 class TestTemporaryLockRefresh:
     async def test_lock_is_automatically_refreshed(self, lock_provider: locks.LockProvider, lock_key: str) -> None:
         lock = lock_provider.lock(lock_key, ttl=datetime.timedelta(milliseconds=500))
-        current_lock = await lock.acquire()
-        initial_expires_at = current_lock.expires_at
+        new_lock = await lock.acquire()
         await asyncio.sleep(0.1)
-        assert (await lock.current_lock).expires_at > initial_expires_at
+        current_lock = await lock.current_lock
+        assert new_lock.expires_at
+        assert current_lock.expires_at
+        assert current_lock.expires_at > new_lock.expires_at
 
     async def test_lock_is_not_refreshed_if_it_was_made_permanent(
         self, lock_provider: locks.LockProvider, lock_key: str

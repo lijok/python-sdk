@@ -63,7 +63,7 @@ class S3LockProvider:
     def lock(
         self,
         key: str,
-        object: typing.Any | None = None,
+        object: _protocol.ObjectType | None = None,
         ttl: datetime.timedelta | None = None,
         additional_metadata: dict[str, str] | None = None,
         retry_times: int | None = None,
@@ -89,7 +89,7 @@ class S3LockProvider:
     def permanent_lock(
         self,
         key: str,
-        object: typing.Any | None = None,
+        object: _protocol.ObjectType | None = None,
         additional_metadata: dict[str, str] | None = None,
         retry_times: int | None = None,
         retry_delay: datetime.timedelta | None = None,
@@ -113,7 +113,7 @@ class S3LockProvider:
 
 class S3Lock:
     key: str
-    object: typing.Any | None
+    object: _protocol.ObjectType | None
     hostname: str
     ttl: datetime.timedelta | None
     metadata: dict[str, str]
@@ -129,7 +129,7 @@ class S3Lock:
     def __init__(
         self,
         key: str,
-        object: typing.Any | None,
+        object: _protocol.ObjectType | None,
         hostname: str,
         ttl: datetime.timedelta | None,
         metadata: dict[str, str],
@@ -269,6 +269,8 @@ class S3Lock:
                         f"tries_left={tries_left}"
                     )
                     raise
+
+        raise RuntimeError()  # Not reachable
 
     async def _acquire(self) -> _protocol.LockInfo:
         existing_lock = await self.current_lock
@@ -528,7 +530,7 @@ class S3Lock:
             metadata=self.metadata,
             is_permanent=self.is_permanent,
             acquired_at=now,
-            expires_at=None if self.is_permanent else now + self.ttl,
+            expires_at=now + self.ttl if self.ttl else None,
             is_owned_by_me=True,
             exists=True,
             owner_guid=self._owner_guid,
@@ -544,10 +546,10 @@ class S3Lock:
                 "ttl": lock_info.ttl.total_seconds() if lock_info.ttl else None,
                 "metadata": lock_info.metadata,
                 "is_permanent": lock_info.is_permanent,
-                "acquired_at": lock_info.acquired_at.isoformat(),
+                "acquired_at": lock_info.acquired_at.isoformat() if lock_info.acquired_at else None,
                 "expires_at": lock_info.expires_at.isoformat() if lock_info.expires_at else None,
                 "owner_guid": lock_info.owner_guid,
-                "held_since": self._held_since.isoformat() if lock_info.held_since else None,
+                "held_since": lock_info.held_since.isoformat() if lock_info.held_since else None,
             },
             default=str,
         )
