@@ -58,6 +58,8 @@ class TestTyping:
             b. Install mypy directly using `pip install mypy`
         """
 
-        code_is_typed_correctly: bool = subprocess.run(["mypy", "--strict", "--warn-unreachable", "."]).returncode == 0
+        code_is_typed_correctly: bool = (
+            subprocess.run(["mypy", "--strict", "--warn-unreachable", "--extra-checks", "."]).returncode == 0
+        )
         assert code_is_typed_correctly, """Mypy has identified typing issues in the code.
 To see the identified issues, check the test output in stdout/stderr."""
