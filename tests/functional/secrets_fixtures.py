@@ -9,7 +9,7 @@ from python_sdk import secrets
 
 
 @pytest.fixture(scope="function")
-def configure_aws_sm_secrets_engine(docker_compose: None) -> None:
+def configure_aws_sm_secrets_engine(localstack: None) -> None:
     secrets.SecretsConfig.set_config_value(option="ENGINE", value="AWS_SECRETS_MANAGER")
     secrets.AWSSecretsEngineConfig.set_config_value(option="ACCESS_KEY_ID", value="fake")
     secrets.AWSSecretsEngineConfig.set_config_value(option="SECRET_ACCESS_KEY", value="fake")
@@ -21,7 +21,7 @@ def configure_aws_sm_secrets_engine(docker_compose: None) -> None:
 
 
 @pytest.fixture(scope="function")
-def configure_aws_ps_secrets_engine(docker_compose: None) -> None:
+def configure_aws_ps_secrets_engine(localstack: None) -> None:
     secrets.SecretsConfig.set_config_value(option="ENGINE", value="AWS_SYSTEMS_MANAGER_PARAMETER_STORE")
     secrets.AWSSecretsEngineConfig.set_config_value(option="ACCESS_KEY_ID", value="fake")
     secrets.AWSSecretsEngineConfig.set_config_value(option="SECRET_ACCESS_KEY", value="fake")

@@ -40,6 +40,9 @@ The `config` package provides a declarative mechanism for defining your applicat
 ### [`encoding`](https://github.com/lijok/python-sdk/blob/main/src/python_sdk/encoding/__init__.py)
 The `encoding` package provides some encoding utils commonly used when authoring networked APIs.
 
+### [`locks`](https://github.com/lijok/python-sdk/blob/main/src/python_sdk/locks/__init__.py)
+The `locks` package contains a distributed locking mechanism backed by multiple different providers.
+
 ### [`log`](https://github.com/lijok/python-sdk/blob/main/src/python_sdk/log/__init__.py)
 The `log` package contains an externally configurable logging interface which supports structured logging and hot reloading.
 
