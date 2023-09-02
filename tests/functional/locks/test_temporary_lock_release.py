@@ -30,6 +30,16 @@ class TestTemporaryLockRelease:
         async with lock_provider.lock(key=lock_key) as lock:
             pass
         assert not (await lock.current_lock).exists
+        assert not (await lock.current_lock).is_owned_by_me
+
+    async def test_context_manager_releases_on_context_exit_when_error_occurs(
+        self, lock_provider: locks.LockProvider, lock_key: str
+    ) -> None:
+        with pytest.raises(ModuleNotFoundError):
+            async with lock_provider.lock(key=lock_key) as lock:
+                raise ModuleNotFoundError()
+        assert not (await lock.current_lock).exists
+        assert not (await lock.current_lock).is_owned_by_me
 
     async def test_can_force_release(self, lock_provider: locks.LockProvider, lock_key: str) -> None:
         lock = lock_provider.lock(key=lock_key)

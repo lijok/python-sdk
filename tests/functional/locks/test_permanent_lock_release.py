@@ -18,6 +18,15 @@ class TestPermanentLockRelease:
         assert (await lock.current_lock).exists
         assert (await lock.current_lock).is_owned_by_me
 
+    async def test_is_not_released_on_context_manager_exit_when_error_occurs(
+        self, lock_provider: locks.LockProvider, lock_key: str
+    ) -> None:
+        with pytest.raises(ModuleNotFoundError):
+            async with lock_provider.permanent_lock(key=lock_key) as lock:
+                raise ModuleNotFoundError()
+        assert (await lock.current_lock).exists
+        assert (await lock.current_lock).is_owned_by_me
+
     async def test_can_force_release(self, lock_provider: locks.LockProvider, lock_key: str) -> None:
         lock = lock_provider.permanent_lock(key=lock_key)
         await lock.acquire()
