@@ -9,6 +9,7 @@ import pytest
 if typing.TYPE_CHECKING:
     import mypy_boto3_s3
     import mypy_boto3_dynamodb
+    import mypy_boto3_cloudwatch
 
 from python_sdk import bin
 
@@ -66,6 +67,16 @@ def aws_s3_client(boto3_session: boto3.Session) -> mypy_boto3_s3.S3Client:
 def aws_dynamodb_client(boto3_session: boto3.Session) -> mypy_boto3_dynamodb.DynamoDBClient:
     return boto3_session.client(
         service_name="dynamodb",
+        use_ssl=USE_SSL,
+        verify=VERIFY,
+        endpoint_url=LOCALSTACK_ENDPOINT_URL,
+    )
+
+
+@pytest.fixture(scope="session", autouse=False)
+def aws_cloudwatch_client(boto3_session: boto3.Session) -> mypy_boto3_cloudwatch.CloudWatchClient:
+    return boto3_session.client(
+        service_name="cloudwatch",
         use_ssl=USE_SSL,
         verify=VERIFY,
         endpoint_url=LOCALSTACK_ENDPOINT_URL,

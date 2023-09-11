@@ -21,12 +21,12 @@ def lock_provider(
     lock_provider_s3: locks.LockProvider,
     lock_provider_aws_dynamodb: locks.LockProvider,
 ) -> locks.LockProvider:
-    requested_lock_provider_type: LockProviderType = request.param
-    if requested_lock_provider_type == "S3":
+    requested_type: LockProviderType = request.param
+    if requested_type == "S3":
         return lock_provider_s3
-    if requested_lock_provider_type == "AWS_DYNAMODB":
+    if requested_type == "AWS_DYNAMODB":
         return lock_provider_aws_dynamodb
-    raise NotImplementedError(requested_lock_provider_type)
+    raise NotImplementedError(requested_type)
 
 
 @pytest.fixture(scope="function", autouse=False)
