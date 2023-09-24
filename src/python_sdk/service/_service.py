@@ -28,6 +28,9 @@ class Service:
     def run(self) -> None:
         asyncio.run(self._run())
 
+    def run_in_background(self) -> asyncio.Task[None]:
+        return asyncio.create_task(self._run())
+
     async def _run(self) -> None:
         await self._reset()
         logging.info(f"Starting service. config={self.config.as_dict}")
