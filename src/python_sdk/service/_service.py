@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import logging
 import signal
 import sys
@@ -19,11 +20,25 @@ class Service:
     config: _service_config.Config
     should_exit: bool
     should_force_exit: bool
+    started_at: datetime.datetime | None
 
     def __init__(self, config: _service_config.Config) -> None:
         self.config = config
         self.should_exit = False
         self.should_force_exit = False
+        self.started_at = None
+
+    @property
+    def elapsed_since_started(self) -> datetime.timedelta:
+        if not self.started_at:
+            return datetime.timedelta(seconds=0)
+        return datetime.datetime.now(tz=datetime.timezone.utc) - self.started_at
+
+    @property
+    def _on_tick_callbacks(self) -> asyncio.Future:
+        return asyncio.gather(
+            self._set_should_exit_flag_if_arrived_at_configured_run_for(),
+        )
 
     def run(self) -> None:
         asyncio.run(self._run())
@@ -32,7 +47,7 @@ class Service:
         return asyncio.create_task(self._run())
 
     async def _run(self) -> None:
-        await self._reset()
+        self._reset()
         logging.info(f"Starting service. config={self.config.as_dict}")
         await self._startup()
         if self.should_exit:
@@ -43,12 +58,13 @@ class Service:
 
         logging.info("Service stopped.")
 
-    async def _reset(self) -> None:
+    def _reset(self) -> None:
         """
         Resets the service so it may be reused after a previous run finished.
         """
         self.should_exit = False
         self.should_force_exit = False
+        self.started_at = None
 
     async def _startup(self) -> None:
         self._install_signal_handlers()
@@ -57,15 +73,16 @@ class Service:
         return
 
     async def _main_loop(self) -> None:
+        self.started_at = datetime.datetime.now(tz=datetime.timezone.utc)
         task = asyncio.create_task(self.config.app.start())
         while not self.should_exit and not task.done():
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(self.config.tick_interval.total_seconds())
             await self._tick()
         if not task.done():
             await self.config.app.stop()
 
     async def _tick(self) -> None:
-        return
+        await self._on_tick_callbacks
 
     def _install_signal_handlers(self) -> None:
         if threading.current_thread() is not threading.main_thread():
@@ -87,4 +104,8 @@ class Service:
         if self.should_exit and sig == signal.SIGINT:
             self.should_force_exit = True
         else:
+            self.should_exit = True
+
+    async def _set_should_exit_flag_if_arrived_at_configured_run_for(self) -> None:
+        if self.config.run_for and self.elapsed_since_started >= self.config.run_for:
             self.should_exit = True
