@@ -49,6 +49,9 @@ The `log` package contains an externally configurable logging interface which su
 ### [`secrets`](https://github.com/lijok/python-sdk/blob/main/src/python_sdk/secrets/__init__.py)
 The `secrets` package provides a simple interface for reading in secrets stored in secrets stores such as AWS Secrets Manager.
 
+### [`service`](https://github.com/lijok/python-sdk/blob/main/src/python_sdk/service/__init__.py)
+The `service` package provides a uvicorn-like service component for running non-webapp services (workers).
+
 ### [`testing`](https://github.com/lijok/python-sdk/blob/main/src/python_sdk/testing/__init__.py)
 The `testing` package provides a highly opinionated acceptance test suite for enforcing code quality. 
 
