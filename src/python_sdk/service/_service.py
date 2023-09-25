@@ -48,15 +48,15 @@ class Service:
 
     async def _run(self) -> None:
         self._reset()
-        logging.info(f"Starting service. config={self.config.as_dict}")
+        logging.debug("Starting service.")
         await self._startup()
         if self.should_exit:
-            logging.info("Service stopped before it got started.")
+            logging.debug("Service stopped before it got started.")
             return
         await self._main_loop()
         await self._shutdown()
 
-        logging.info("Service stopped.")
+        logging.debug("Service stopped.")
 
     def _reset(self) -> None:
         """
