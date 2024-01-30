@@ -9,7 +9,7 @@ services:
       - "0.0.0.0:4510-4559:4510-4559"  # external service port range
       - "0.0.0.0:4566:4566"            # LocalStack Edge Proxy
     environment:
-      SERVICES: secretsmanager,systemsmanager,dynamodb,s3
+      SERVICES: secretsmanager,ssm,dynamodb,s3,kms
       DYNAMODB_IN_MEMORY: 1
     volumes:
       - "${LOCALSTACK_VOLUME_DIR:-./.docker}:/var/lib/localstack"
