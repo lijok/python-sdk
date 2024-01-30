@@ -274,6 +274,7 @@ class ConfigSourcesConfig(
         description="User-Agent string to send along when accessing the REMOTE_HTTP_FILE config source.",
     )
 
+    # TODO(lijok): Bucket and File Key should be one config
     SOURCE_S3_FILE_BUCKET: str | None = _config_option.Option(
         description="""
         Bucket for the S3_FILE config source. Required when PYTHON_SDK_CONFIG_SOURCE is set to S3_FILE.
