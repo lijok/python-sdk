@@ -1,3 +1,4 @@
+import io
 import os
 import pathlib
 import typing
@@ -84,7 +85,7 @@ class FileObject:
             key, val = line.split(self.key_value_separator, 1)
             configuration[key] = val
 
-        return StaticDictionary(dictionary=dict(os.environ))(prefix=prefix)
+        return StaticDictionary(dictionary=configuration)(prefix=prefix)
 
 
 class LocalFile:
@@ -131,6 +132,40 @@ class S3File:
     ```
     """
 
+    def __init__(
+        self,
+        bucket: str,
+        key: str,
+        timeout: float = 10.0,
+        aws_access_key_id: str | None = None,
+        aws_secret_access_key: str | None = None,
+        aws_session_token: str | None = None,
+        region_name: str | None = None,
+        api_version: str | None = None,
+        use_ssl: bool = True,
+        verify: bool | str | None = None,
+        endpoint_url: str | None = None,
+        # botocore_config: botocore.config.Config | None = None,
+    ) -> None:
+        self.bucket = bucket
+        self.key = key
+        self.timeout = timeout
+
+        import boto3
+
+        self.client = boto3.Session().client(
+            service_name="s3",
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+            region_name=region_name,
+            api_version=api_version,
+            use_ssl=use_ssl,
+            verify=verify,
+            endpoint_url=endpoint_url,
+            # config=botocore_config,
+        )
+
     def __call__(self, prefix: str) -> dict[str, str]:
         """
         Raises:
@@ -138,7 +173,11 @@ class S3File:
             ConnectionError: Could not connect to a networked config source.
             ValueError: Could not parse the config file, which may be malformed.
         """
-        return {}
+        in_memory_file = io.BytesIO()
+        self.client.download_fileobj(Bucket=self.bucket, Key=self.key, Fileobj=in_memory_file)
+        in_memory_file.seek(0)
+        file = io.StringIO(in_memory_file.getvalue().decode("utf-8"))
+        return FileObject(file=file)(prefix=prefix)
 
 
 class AWSSecretsManagerSecret:
