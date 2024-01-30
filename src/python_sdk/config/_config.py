@@ -257,6 +257,7 @@ class ConfigSourcesConfig(
         """,
         validators=[_config_value_validators.ValidateFileExists(), _config_value_validators.ValidatePathIsReadable()],
     )
+
     SOURCE_REMOTE_HTTP_FILE_URL: str | None = _config_option.Option(
         description="""
         URL for the REMOTE_HTTP_FILE config source. Required when PYTHON_SDK_CONFIG_SOURCE is set to REMOTE_HTTP_FILE.
@@ -273,6 +274,48 @@ class ConfigSourcesConfig(
         description="User-Agent string to send along when accessing the REMOTE_HTTP_FILE config source.",
     )
 
+    SOURCE_S3_FILE_BUCKET: str | None = _config_option.Option(
+        description="""
+        Bucket for the S3_FILE config source. Required when PYTHON_SDK_CONFIG_SOURCE is set to S3_FILE.
+        """
+    )
+    # TODO(lijok): Version ID support
+    SOURCE_S3_FILE_KEY: str | None = _config_option.Option(
+        description="""
+        Key for the S3_FILE config source. Required when PYTHON_SDK_CONFIG_SOURCE is set to S3_FILE.
+        """
+    )
+    SOURCE_S3_FILE_TIMEOUT: int = _config_option.Option(
+        default=10, description="Timeout for the S3_FILE config source."
+    )
+    SOURCE_S3_FILE_AWS_ACCESS_KEY_ID: str | None = _config_option.Option(
+        description="AWS access key ID to use when accessing the S3_FILE config source."
+    )
+    SOURCE_S3_FILE_AWS_SECRET_ACCESS_KEY: str | None = _config_option.Option(
+        description="AWS secret access key to use when accessing the S3_FILE config source."
+    )
+    SOURCE_S3_FILE_AWS_SESSION_TOKEN: str | None = _config_option.Option(
+        description="AWS session token to use when accessing the S3_FILE config source."
+    )
+    SOURCE_S3_FILE_REGION_NAME: str | None = _config_option.Option(
+        description="AWS region name to use when accessing the S3_FILE config source."
+    )
+    SOURCE_S3_FILE_API_VERSION: str | None = _config_option.Option(
+        description="AWS API version to use when accessing the S3_FILE config source."
+    )
+    SOURCE_S3_FILE_USE_SSL: bool = _config_option.Option(
+        default=True, description="Whether to use SSL when accessing the S3_FILE config source."
+    )
+    SOURCE_S3_FILE_VERIFY: bool | None = _config_option.Option(
+        description="Whether to verify SSL when accessing the S3_FILE config source."
+    )
+    SOURCE_S3_CA_CERT_BUNDLE_PATH: str | None = _config_option.Option(
+        description="Path to custom CA cert bundle to use when accessing the S3_FILE config source."
+    )
+    SOURCE_S3_FILE_ENDPOINT_URL: str | None = _config_option.Option(
+        description="Endpoint URL to use when accessing the S3_FILE config source."
+    )
+
     @classmethod
     def validate(cls) -> None:
         if cls.SOURCE == "LOCAL_FILE" and not cls.SOURCE_LOCAL_FILE_FILEPATH:
@@ -283,6 +326,15 @@ class ConfigSourcesConfig(
             raise _config_validators.ConfigValidationError(
                 "PYTHON_SDK_CONFIG_SOURCE_REMOTE_HTTP_FILE_URL must be set when PYTHON_SDK_CONFIG_SOURCE is "
                 "REMOTE_HTTP_FILE."
+            )
+        if cls.SOURCE == "S3_FILE" and any(
+            [
+                not cls.SOURCE_S3_FILE_BUCKET,
+                not cls.SOURCE_S3_FILE_KEY,
+            ]
+        ):
+            raise _config_validators.ConfigValidationError(
+                "PYTHON_SDK_CONFIG_SOURCE_S3_FILE_BUCKET must be set when PYTHON_SDK_CONFIG_SOURCE is S3_FILE."
             )
 
 
@@ -300,6 +352,22 @@ def _get_config_sources() -> list[_config_sources.ConfigSource]:
                 timeout=ConfigSourcesConfig.SOURCE_REMOTE_HTTP_FILE_TIMEOUT,
                 authorization_header=ConfigSourcesConfig.SOURCE_REMOTE_HTTP_FILE_AUTHORIZATION_HEADER,
                 user_agent_string=ConfigSourcesConfig.SOURCE_REMOTE_HTTP_FILE_USER_AGENT_STRING,
+            )
+        ]
+    elif ConfigSourcesConfig.SOURCE == "S3_FILE":
+        return [
+            _config_sources.S3File(
+                bucket=ConfigSourcesConfig.SOURCE_S3_FILE_BUCKET,
+                key=ConfigSourcesConfig.SOURCE_S3_FILE_KEY,
+                timeout=ConfigSourcesConfig.SOURCE_S3_FILE_TIMEOUT,
+                aws_access_key_id=ConfigSourcesConfig.SOURCE_S3_FILE_AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=ConfigSourcesConfig.SOURCE_S3_FILE_AWS_SECRET_ACCESS_KEY,
+                aws_session_token=ConfigSourcesConfig.SOURCE_S3_FILE_AWS_SESSION_TOKEN,
+                region_name=ConfigSourcesConfig.SOURCE_S3_FILE_REGION_NAME,
+                api_version=ConfigSourcesConfig.SOURCE_S3_FILE_API_VERSION,
+                use_ssl=ConfigSourcesConfig.SOURCE_S3_FILE_USE_SSL,
+                verify=ConfigSourcesConfig.SOURCE_S3_FILE_VERIFY,
+                endpoint_url=ConfigSourcesConfig.SOURCE_S3_FILE_ENDPOINT_URL,
             )
         ]
     raise NotImplementedError()
