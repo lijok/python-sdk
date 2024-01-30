@@ -283,9 +283,14 @@ class AWSDynamoDBLock:
                 TableName=self.table_name,
                 Item=self._lock_info_to_aws_dynamodb_record(lock_info=new_lock),
                 ConditionExpression=(
-                    "attribute_not_exists(LockID) OR "
-                    "(expires_at < :current_datetime AND is_permanent = :is_permanent)"
+                    "attribute_not_exists(#pk) OR "
+                    "(#expires_at < :current_datetime AND #is_permanent = :is_permanent)"
                 ),
+                ExpressionAttributeNames={
+                    "#pk": self.partition_key,
+                    "#expires_at": "expires_at",
+                    "#is_permanent": "is_permanent",
+                },
                 ExpressionAttributeValues={
                     ":is_permanent": {"BOOL": False},
                     ":current_datetime": {"S": datetime.datetime.now(tz=datetime.timezone.utc).isoformat()},
@@ -350,7 +355,10 @@ class AWSDynamoDBLock:
                 self._aws_dynamodb_client.put_item,
                 TableName=self.table_name,
                 Item=self._lock_info_to_aws_dynamodb_record(lock_info=new_lock),
-                ConditionExpression="owner_guid = :owner_guid",
+                ConditionExpression="#owner_guid = :owner_guid",
+                ExpressionAttributeNames={
+                    "#owner_guid": "owner_guid",
+                },
                 ExpressionAttributeValues={
                     ":owner_guid": {"S": new_lock.owner_guid},
                 },
@@ -456,7 +464,11 @@ class AWSDynamoDBLock:
                 self._aws_dynamodb_client.delete_item,
                 TableName=self.table_name,
                 Key={self.partition_key: {"S": self.key}},
-                ConditionExpression="owner_guid = :owner_guid AND is_permanent = :is_permanent",
+                ConditionExpression="#owner_guid = :owner_guid AND #is_permanent = :is_permanent",
+                ExpressionAttributeNames={
+                    "#owner_guid": "owner_guid",
+                    "#is_permanent": "is_permanent",
+                },
                 ExpressionAttributeValues={
                     ":owner_guid": {"S": self._owner_guid},
                     ":is_permanent": {"BOOL": False},

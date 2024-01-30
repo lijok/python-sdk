@@ -65,7 +65,7 @@ def random_aws_sm_secret_string(aws_sm_client: typing.Any) -> typing.Generator[t
     name, value = str(uuid.uuid4()), str(uuid.uuid4())
     response = aws_sm_client.create_secret(Name=name, SecretString=value)
     yield name, value
-    aws_sm_client.delete_secret(SecretId=response["ARN"], RecoveryWindowInDays=0, ForceDeleteWithoutRecovery=True)
+    aws_sm_client.delete_secret(SecretId=response["ARN"], RecoveryWindowInDays=7, ForceDeleteWithoutRecovery=True)
 
 
 @pytest.fixture(scope="function")
@@ -73,7 +73,7 @@ def random_aws_sm_secret_binary(aws_sm_client: typing.Any) -> typing.Generator[t
     name, value = str(uuid.uuid4()), str(uuid.uuid4())
     response = aws_sm_client.create_secret(Name=name, SecretBinary=value.encode("utf-8"))
     yield name, value
-    aws_sm_client.delete_secret(SecretId=response["ARN"], RecoveryWindowInDays=0, ForceDeleteWithoutRecovery=True)
+    aws_sm_client.delete_secret(SecretId=response["ARN"], RecoveryWindowInDays=7, ForceDeleteWithoutRecovery=True)
 
 
 @pytest.fixture(scope="function")
@@ -81,7 +81,7 @@ def random_aws_sm_secret_json(aws_sm_client: typing.Any) -> typing.Generator[tup
     name, value = str(uuid.uuid4()), {str(uuid.uuid4()): str(uuid.uuid4())}
     response = aws_sm_client.create_secret(Name=name, SecretString=json.dumps(value))
     yield name, value
-    aws_sm_client.delete_secret(SecretId=response["ARN"], RecoveryWindowInDays=0, ForceDeleteWithoutRecovery=True)
+    aws_sm_client.delete_secret(SecretId=response["ARN"], RecoveryWindowInDays=7, ForceDeleteWithoutRecovery=True)
 
 
 @pytest.fixture(scope="function")
