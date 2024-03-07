@@ -33,8 +33,9 @@ class AWSDynamoDBLockProvider:
     default_retry_delay: datetime.timedelta
     _aws_dynamodb_client: mypy_boto3_dynamodb.DynamoDBClient
     table_name: str
-    partition_key: str
     object_key: str
+    partition_key: str
+    sort_key: str | None
 
     def __init__(
         self,
@@ -45,8 +46,9 @@ class AWSDynamoDBLockProvider:
         default_retry_delay: datetime.timedelta,
         aws_dynamodb_client: mypy_boto3_dynamodb.DynamoDBClient,
         table_name: str,
-        partition_key: str,
         object_key: str,
+        partition_key: str,
+        sort_key: str | None,
     ) -> None:
         self.hostname = hostname or socket.gethostname()
         self.default_ttl = default_ttl
@@ -55,8 +57,9 @@ class AWSDynamoDBLockProvider:
         self.default_retry_delay = default_retry_delay
         self._aws_dynamodb_client = aws_dynamodb_client
         self.table_name = table_name
-        self.partition_key = partition_key
         self.object_key = object_key
+        self.partition_key = partition_key
+        self.sort_key = sort_key
 
     def lock(
         self,
@@ -81,8 +84,9 @@ class AWSDynamoDBLockProvider:
             retry_delay=retry_delay or self.default_retry_delay,
             aws_dynamodb_client=self._aws_dynamodb_client,
             table_name=self.table_name,
-            partition_key=self.partition_key,
             object_key=self.object_key,
+            partition_key=self.partition_key,
+            sort_key=self.sort_key,
         )
 
     def permanent_lock(
@@ -106,8 +110,9 @@ class AWSDynamoDBLockProvider:
             retry_delay=retry_delay or self.default_retry_delay,
             aws_dynamodb_client=self._aws_dynamodb_client,
             table_name=self.table_name,
-            partition_key=self.partition_key,
             object_key=self.object_key,
+            partition_key=self.partition_key,
+            sort_key=self.sort_key,
         )
 
 
@@ -122,8 +127,9 @@ class AWSDynamoDBLock:
     retry_delay: datetime.timedelta
     _aws_dynamodb_client: mypy_boto3_dynamodb.DynamoDBClient
     table_name: str
-    partition_key: str
     object_key: str
+    partition_key: str
+    sort_key: str | None
     _owner_guid: str
     _heartbeat_task: asyncio.Task[None] | None
     _held_since: datetime.datetime | None
@@ -140,8 +146,9 @@ class AWSDynamoDBLock:
         retry_delay: datetime.timedelta,
         aws_dynamodb_client: mypy_boto3_dynamodb.DynamoDBClient,
         table_name: str,
-        partition_key: str,
         object_key: str,
+        partition_key: str,
+        sort_key: str | None,
     ):
         if ttl == datetime.timedelta(seconds=0) and not is_permanent:
             raise ValueError("TTL must be higher than 0 seconds for temporary locks.")
@@ -156,18 +163,26 @@ class AWSDynamoDBLock:
         self.retry_delay = retry_delay
         self._aws_dynamodb_client = aws_dynamodb_client
         self.table_name = table_name
-        self.partition_key = partition_key
         self.object_key = object_key
+        self.partition_key = partition_key
+        self.sort_key = sort_key
         self._owner_guid = str(uuid.uuid4())
         self._heartbeat_task = None
         self._held_since = None
+
+    @property
+    def _db_key_serialized(self) -> dict[str, dict[str, str]]:
+        key = {self.partition_key: {"S": self.key}}
+        if self.sort_key:
+            key[self.sort_key] = {"S": "-"}
+        return key
 
     @property
     async def current_lock(self) -> _protocol.LockInfo:
         response = await asyncio.to_thread(
             self._aws_dynamodb_client.get_item,
             TableName=self.table_name,
-            Key={self.partition_key: {"S": self.key}},
+            Key=self._db_key_serialized,
             ConsistentRead=True,
         )
         if "Item" not in response or not response["Item"]:
@@ -463,7 +478,7 @@ class AWSDynamoDBLock:
             await asyncio.to_thread(
                 self._aws_dynamodb_client.delete_item,
                 TableName=self.table_name,
-                Key={self.partition_key: {"S": self.key}},
+                Key=self._db_key_serialized,
                 ConditionExpression="#owner_guid = :owner_guid AND #is_permanent = :is_permanent",
                 ExpressionAttributeNames={
                     "#owner_guid": "owner_guid",
@@ -510,7 +525,7 @@ class AWSDynamoDBLock:
             await asyncio.to_thread(
                 self._aws_dynamodb_client.delete_item,
                 TableName=self.table_name,
-                Key={self.partition_key: {"S": self.key}},
+                Key=self._db_key_serialized,
             )
         except botocore.exceptions.ClientError as e:
             error_code = e.response["Error"]["Code"]
@@ -564,6 +579,8 @@ class AWSDynamoDBLock:
             "owner_guid": lock_info.owner_guid,
             "held_since": lock_info.held_since.isoformat() if lock_info.held_since else None,
         }
+        if self.sort_key:
+            data[self.sort_key] = "-"
 
         serializer = boto3.dynamodb.types.TypeSerializer()
         return {k: serializer.serialize(v) for k, v in data.items()}

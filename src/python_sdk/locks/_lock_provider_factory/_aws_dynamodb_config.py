@@ -17,8 +17,9 @@ class AWSDynamoDBConfig:
     default_retry_delay: datetime.timedelta
     aws_dynamodb_client: mypy_boto3_dynamodb.DynamoDBClient
     table_name: str
-    partition_key: str
     object_key: str
+    partition_key: str
+    sort_key: str | None = None
 
     @property
     def as_dict(self) -> AWSDynamoDBConfigDict:

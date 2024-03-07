@@ -62,8 +62,9 @@ def lock_provider_aws_dynamodb(
             default_retry_delay=datetime.timedelta(seconds=0),
             aws_dynamodb_client=aws_dynamodb_client,
             table_name=aws_dynamodb_table_for_aws_dynamodb_lock_provider,
-            partition_key="LockID",
             object_key="state",
+            partition_key="p",
+            sort_key="s",
         )
     )
 
@@ -107,15 +108,23 @@ def aws_dynamodb_table_for_aws_dynamodb_lock_provider(
         TableName=table_name,
         AttributeDefinitions=[
             {
-                "AttributeName": "LockID",
+                "AttributeName": "p",
                 "AttributeType": "S",
-            }
+            },
+            {
+                "AttributeName": "s",
+                "AttributeType": "S",
+            },
         ],
         KeySchema=[
             {
-                "AttributeName": "LockID",
+                "AttributeName": "p",
                 "KeyType": "HASH",
-            }
+            },
+            {
+                "AttributeName": "s",
+                "KeyType": "RANGE",
+            },
         ],
         BillingMode="PAY_PER_REQUEST",
         SSESpecification={
